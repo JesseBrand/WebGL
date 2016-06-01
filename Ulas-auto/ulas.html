@@ -1,0 +1,141 @@
+<html>
+	<head>
+		<script type="text/javascript" src="three.js"></script>
+		<script type="text/javascript">
+
+function init() {
+	var camera, scene, renderer;
+
+	var ambient = new THREE.AmbientLight( 0xffffff, 0.5 );
+	
+	var spotLight1 = new THREE.SpotLight( 0xffcccc, 1 );
+	var spotLight2 = new THREE.SpotLight( 0xccccff, 1 );
+	var spotLight3 = new THREE.SpotLight( 0xccffcc, 1 );
+	
+	var matFloor = new THREE.MeshPhongMaterial();
+	var geoFloor = new THREE.BoxGeometry( 5000, 1, 5000 );
+	var mshFloor = new THREE.Mesh( geoFloor, matFloor );
+	
+	matFloor.color.set( 0x202020 );
+	mshFloor.receiveShadow = true;
+	mshFloor.position.set( 0, -250, 0 );
+	
+	configureSpotlight(spotLight1);
+	configureSpotlight(spotLight2);
+	configureSpotlight(spotLight3);
+
+	spotLight1.position.set( -200, 500, -200 );
+	spotLight2.position.set( 0, 500, 200 );
+	spotLight3.position.set( 200, 500, -200 );
+	
+	camera = new THREE.PerspectiveCamera( 70, window.innerWidth / window.innerHeight, 1, 1000 );
+	camera.position.z = 500;
+	scene = new THREE.Scene();
+
+	var geometry1 = new THREE.BoxBufferGeometry( 200, 200, 200 );
+	
+	var geometryC1 = new THREE.CylinderGeometry( 20, 20, 20, 32 );
+	var geometryC2 = new THREE.CylinderGeometry( 20, 20, 20, 32 );
+	var geometryC3 = new THREE.CylinderGeometry( 20, 20, 20, 32 );
+	var geometryC4 = new THREE.CylinderGeometry( 20, 20, 20, 32 );
+	
+	var textureC = new THREE.TextureLoader().load( ['cube.jpg'] );
+	var textureW = new THREE.TextureLoader().load( ['wheel.png'] );
+	
+	var material1 = new THREE.MeshPhongMaterial({map: textureC});
+	var material2 = new THREE.MeshPhongMaterial({map: textureW});
+	
+	var mesh = new THREE.Mesh( geometry1, material1 );
+	mesh.receiveShadow = true;
+	mesh.castShadow = true;
+	
+	meshC1 = new THREE.Mesh( geometryC1, material2 );
+	meshC2 = new THREE.Mesh( geometryC2, material2 );
+	meshC3 = new THREE.Mesh( geometryC3, material2 );
+	meshC4 = new THREE.Mesh( geometryC4, material2 );
+	
+	meshC1.position.x = mesh.position.x - 80;
+	meshC1.position.y = mesh.position.y - 110;
+	meshC1.position.z = mesh.position.z - 100;
+	
+	meshC2.position.x = mesh.position.x - 80;
+	meshC2.position.y = mesh.position.y - 110;
+	meshC2.position.z = mesh.position.z + 100;
+	
+	meshC3.position.x = mesh.position.x + 80;
+	meshC3.position.y = mesh.position.y - 110;
+	meshC3.position.z = mesh.position.z - 100;
+	
+	meshC4.position.x = mesh.position.x + 80;
+	meshC4.position.y = mesh.position.y - 110;
+	meshC4.position.z = mesh.position.z + 100;
+	
+	meshC1.rotation.x += Math.PI / 2;
+	meshC2.rotation.x += Math.PI / 2;
+	meshC3.rotation.x += Math.PI / 2;
+	meshC4.rotation.x += Math.PI / 2;
+
+	scene.add( mshFloor );
+	scene.add( mesh );
+	scene.add( meshC1 );
+	scene.add( meshC2 );
+	scene.add( meshC3 );
+	scene.add( meshC4 );
+	
+	scene.add( ambient );
+	scene.add( spotLight1 );
+	scene.add( spotLight2 );
+	scene.add( spotLight3 );
+	
+	renderer = new THREE.WebGLRenderer();
+	renderer.setPixelRatio( window.devicePixelRatio );
+	renderer.setSize( window.innerWidth, window.innerHeight );
+	
+	renderer.shadowMap.enabled = true;
+	renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+	renderer.gammaInput = true;
+	renderer.gammaOutput = true;
+	
+	document.body.appendChild( renderer.domElement );
+	//
+	window.addEventListener( 'resize', onWindowResize, false );
+	
+	function onWindowResize() {
+		camera.aspect = window.innerWidth / window.innerHeight;
+		camera.updateProjectionMatrix();
+		renderer.setSize( window.innerWidth, window.innerHeight );
+	}
+	
+	function configureSpotlight(spotlight) {
+		spotlight.castShadow = true;
+		spotlight.angle = Math.PI / 4;
+		spotlight.penumbra = 0.05;
+		spotlight.decay = 1;
+		spotlight.distance = 1000;
+		spotlight.intensity = 20;
+		spotlight.shadow.mapSize.width = 1024;
+		spotlight.shadow.mapSize.height = 1024;
+		spotlight.shadow.camera.near = 1;
+		spotlight.shadow.camera.far = 200;
+	}
+
+	function animate() {
+		requestAnimationFrame( animate );
+		meshC1.rotation.y += 0.75;
+		meshC2.rotation.y += 0.75;
+		meshC3.rotation.y += 0.75;
+		meshC4.rotation.y += 0.75;
+
+		scene.rotation.y += 0.05;
+		//scene.rotation.z += 0.02;
+		renderer.render( scene, camera );
+	}
+	
+	animate();
+}
+
+		</script>
+	</head>
+	<body onload="init()">
+	</body>
+</html>
