@@ -1,0 +1,155 @@
+<html>
+	<head>
+		<script type="text/javascript" src="../../lib/three.js"></script>
+		<script type="text/javascript" src="../../lib/OrbitControls.js"></script>
+		<script type="text/javascript">
+
+var width = window.innerWidth - 40;
+var height = window.innerHeight - 40;
+var aspect = width / height;
+var cameraDistance = 10;
+var clusterSize = 1;
+var clusterCount = 1000;
+var galaxyRadius = 10;
+var galaxyFactor = 4;
+var galaxyRotationSpeed = Math.PI / 1024;
+var maxSphereDist = Math.sqrt(galaxyRadius) * galaxyFactor;
+
+var xAxis = new THREE.Vector3(1, 0, 0);
+var yAxis = new THREE.Vector3(0, 1, 0);
+var zAxis = new THREE.Vector3(0, 0, 1);
+
+var starCount = 1000;
+var starSphereRadius = 50;
+
+var scene;
+var controls;
+var camera;
+var renderer;
+var galaxy;
+var clusters = [];
+var clusterGeo;
+
+var animateCamera = false;
+var animateGalaxy = true;
+
+var cameraRotation = Math.PI / 4;
+var cameraRotationInc = -Math.PI / 1024;
+
+function init() {
+	scene = new THREE.Scene();
+	initCamera();
+
+	renderer = new THREE.WebGLRenderer();
+	renderer.setSize(width, height);
+	document.body.appendChild( renderer.domElement );
+	
+	initControls(camera, renderer);
+	
+	addLights(scene);
+	
+	addGalaxy(scene);
+
+	addBackground(scene);
+	
+	render();
+}
+
+function initCamera() {
+	camera = new THREE.PerspectiveCamera(90, aspect, 0.1, 1000);
+	camera.rotateOnAxis(xAxis, -cameraRotation);
+	updateCameraPosition();
+}
+
+function updateCameraPosition() {
+	camera.position.y = Math.sin(cameraRotation) * cameraDistance;
+	camera.position.z = Math.cos(cameraRotation) * cameraDistance;
+}
+
+function initControls(camera, renderer) {
+	controls = new THREE.OrbitControls( camera, renderer.domElement );
+//	controls.enableDamping = true;
+//	controls.dampingFactor = 0.25;
+//	controls.enableZoom = false;
+}
+
+function addLights(scene) {
+	scene.add(new THREE.AmbientLight(0x202020));
+	
+	var light = new THREE.PointLight(0xffff80, 1, 100);
+	light.position.set(0, 5, 0);
+	scene.add(light);
+	
+	light = new THREE.PointLight(0xffff80, 1, 100);
+	light.position.set(0, -5, 0);
+	scene.add(light);
+}
+
+function addDebug(scene) {
+	scene.add(new THREE.Mesh(new THREE.CubeGeometry(2, 2, 1), new THREE.MeshBasicMaterial({color: 0xffffff})));
+	scene.add(new THREE.AxisHelper(5));
+}
+
+function addGalaxy(scene) {
+	clusterGeo = new THREE.SphereGeometry(clusterSize, 16, 6);
+	addCluster(scene, 0, .001);
+	for (var i = 0; i < clusterCount; i++) {
+		var rot = THREE.Math.randFloat(0, 2 * Math.PI);
+		var dist = Math.sqrt(THREE.Math.randFloat(0, galaxyRadius)) * galaxyFactor;
+		addCluster(scene, rot, dist);
+	}
+}
+
+function addCluster(scene, rot, dist) {
+	var normDist = dist / maxSphereDist;
+	var red = 0.1 / normDist;
+	var green = 0.02 / normDist;
+	var blue = Math.sin(normDist * 2) + 0.02 / normDist - .03;
+	var material = new THREE.MeshPhongMaterial({color: new THREE.Color(red, green, blue), opacity: 1 - (5 * normDist / maxSphereDist), transparent: true});
+	var cluster = new THREE.Mesh(clusterGeo, material);
+	cluster.position.x = Math.sin(rot) * dist;
+	cluster.position.z = Math.cos(rot) * dist;
+	cluster.scale.y = .2 / (normDist + .2) / 2;
+	clusters.push({mesh: cluster, dist: dist});
+	scene.add(cluster);
+}
+
+function addBackground(scene) {
+	var pointGeo = new THREE.Geometry();
+	for (var i = 0; i < starCount; i ++ ) {
+		var lat = THREE.Math.randFloat(0, 2 * Math.PI);
+		var lng = THREE.Math.randFloat(0, 2 * Math.PI);
+		var v = new THREE.Vector3();
+		v.x = Math.sin(lng) * Math.cos(lat) * starSphereRadius;
+		v.y = Math.sin(lat) * starSphereRadius;
+		v.z = Math.cos(lng) * Math.cos(lat) * starSphereRadius;
+		pointGeo.vertices.push(v);
+	}
+	var particles = new THREE.Points(pointGeo, new THREE.PointsMaterial({color: 0x888888, size: 0.1}));
+	scene.add(particles);
+}
+	
+function render() {
+	requestAnimationFrame(render);
+	controls.update();
+	if (animateCamera) {
+		cameraRotation += cameraRotationInc;
+		camera.rotateOnAxis(xAxis, -cameraRotationInc);
+		updateCameraPosition();
+	}
+	if (animateGalaxy) {
+		for (var i = 0; i < clusters.length; i++) {
+			var cluster = clusters[i];
+			var rotationMatrix = new THREE.Matrix4();
+			rotationMatrix.makeRotationY(galaxyRotationSpeed * maxSphereDist / cluster.dist);
+			cluster.mesh.position.applyMatrix4(rotationMatrix);
+		}
+	}
+	renderer.render(scene, camera);
+}
+
+		</script>
+	</head>
+	<body onload="init()" style="background-color:black">
+	</body>
+</html>
