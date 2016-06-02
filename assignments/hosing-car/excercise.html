@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset=utf-8>
+    <title>My first Three.js app</title>
+    <style>
+        body {
+            margin: 0;
+        }
+
+        canvas {
+            width: 100%;
+            height: 100%
+        }
+    </style>
+</head>
+<body>
+<script src="js/three.js"></script>
+<script src="js/OrbitControls.js"></script>
+<script>
+    // Our Javascript will go here.
+
+
+    var scene = new THREE.Scene();
+    var camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+
+    controls = new THREE.OrbitControls( camera );
+    controls.addEventListener( 'change', render );
+
+    var renderer = new THREE.WebGLRenderer();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    document.body.appendChild(renderer.domElement);
+
+
+    // The car
+    var carBaseGeometry = new THREE.BoxGeometry(10, 2, 5);
+    var carTopGeometry = new THREE.BoxGeometry(6, 2, 5);
+    var carGeometry = new THREE.Geometry();
+
+    var carBaseMesh = new THREE.Mesh(carBaseGeometry);
+    var carTopMesh = new THREE.Mesh(carTopGeometry);
+    carTopMesh.position.y += 1;
+
+    carBaseMesh.updateMatrix(); // as needed
+    carGeometry.merge(carBaseMesh.geometry, carBaseMesh.matrix);
+
+    carTopMesh.updateMatrix(); // as needed
+    carGeometry.merge(carTopMesh.geometry, carTopMesh.matrix);
+
+    var material = new THREE.MeshLambertMaterial({color: 0x00FF00});
+    var carMesh = new THREE.Mesh(carGeometry, material); // Merged car top and car base
+
+    var wheelMaterial = new THREE.MeshLambertMaterial( {color: 0xffff00} );
+
+    var wheelFLGeometry = new THREE.CylinderGeometry( 1.2, 1.2, 1, 6 );
+    var wheelFLMesh = new THREE.Mesh( wheelFLGeometry, wheelMaterial );
+    wheelFLMesh.position.x += -3.5;
+    wheelFLMesh.position.y += -1.1;
+    wheelFLMesh.position.z += 2.01;
+    wheelFLMesh.rotation.x += 1.57;
+
+    var wheelFRGeometry = new THREE.CylinderGeometry( 1.2, 1.2, 1, 6 );
+    var wheelFRMesh = new THREE.Mesh( wheelFRGeometry, wheelMaterial );
+    wheelFRMesh.position.x += -3.5;
+    wheelFRMesh.position.y += -1.1;
+    wheelFRMesh.position.z += -2;
+    wheelFRMesh.rotation.x += 1.55;
+
+    var wheelBLGeometry = new THREE.CylinderGeometry( 1.2, 1.2, 1, 6 );
+    var wheelBLMesh = new THREE.Mesh( wheelBLGeometry, wheelMaterial );
+    wheelBLMesh.position.x += 3.5;
+    wheelBLMesh.position.y += -1.1;
+    wheelBLMesh.position.z += 2.01;
+    wheelBLMesh.rotation.x += 1.57;
+
+    var wheelBRGeometry = new THREE.CylinderGeometry( 1.2, 1.2, 1, 6 );
+    var wheelBRMesh = new THREE.Mesh( wheelBRGeometry, wheelMaterial );
+    wheelBRMesh.position.x += 3.5;
+    wheelBRMesh.position.y += -1.1;
+    wheelBRMesh.position.z += -2;
+    wheelBRMesh.rotation.x += 1.55;
+
+
+
+    var carGroup = new THREE.Group();
+    carGroup.add(carMesh);
+    carGroup.add(wheelFLMesh);
+    carGroup.add(wheelFRMesh);
+    carGroup.add(wheelBLMesh);
+    carGroup.add(wheelBRMesh);
+
+
+    scene.add(carGroup);
+
+
+    camera.position.z = 10;
+
+    var light = new THREE.AmbientLight( 0x404040 ); // soft white light
+    scene.add( light )
+
+    var directionalLight = new THREE.DirectionalLight( 0xffffff, 1 );
+    directionalLight.position.set( -0.5, 1, 1 );
+    scene.add( directionalLight );
+
+    function render() {
+        requestAnimationFrame(render);
+
+        //carGroup.rotation.x += 0.1;
+        //carGroup.rotation.y += 0.1;
+
+        carGroup.position.x -= 0.001;
+
+        wheelBRMesh.rotation.y += 0.1;
+        wheelFRMesh.rotation.y += 0.1;
+        wheelBLMesh.rotation.y += 0.1;
+        wheelFLMesh.rotation.y += 0.1;
+
+        renderer.render(scene, camera);
+    }
+    render();
+
+
+</script>
+</body>
+</html>
+
