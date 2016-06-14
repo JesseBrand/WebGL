@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<!-- saved from url=(0042)http://threegraphs.com/charts/sample/area/ -->
+<html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <title>3D area chart - Area chart sample</title>
+    
+    <link rel="stylesheet" href="./3D area chart - Area chart sample_files/reset.css">
+<link rel="stylesheet" href="./3D area chart - Area chart sample_files/jquery.tablesheet.css">
+<link rel="stylesheet" href="./3D area chart - Area chart sample_files/jquery-ui.css">
+<link rel="stylesheet" href="./3D area chart - Area chart sample_files/jquery.colorpicker.css">
+<link rel="stylesheet" href="./3D area chart - Area chart sample_files/scenes.css">
+  </head>
+  
+  <body style="background-color: rgb(0, 0, 0);">
+    
+    <div id="div-controls">
+  <a href="http://threegraphs.com/"><img src="./3D area chart - Area chart sample_files/logo_s.png"></a>
+  <div class="separator_big_h"></div>
+  <ul>
+    <li>
+      <a href="http://threegraphs.com/charts/sample/area/#" title="export bar chart" id="link-export">
+        <img src="./3D area chart - Area chart sample_files/icon_export.png" alt="Export"> Export 
+      </a>
+    </li>
+    <li>
+      <a href="http://threegraphs.com/charts/sample/area/#" title="edit bar chart" id="link-edit">
+        <img src="./3D area chart - Area chart sample_files/icon_settings.png" alt="Edit"> Edit
+      </a>
+    </li>
+  </ul>
+</div>
+    
+    <div id="valuelabel" style="color: rgb(255, 255, 255);">
+</div>
+
+<div id="div-legend">
+  <h4>Area chart sample</h4>
+  
+</div>
+    
+    
+      
+    
+    
+    
+    
+  
+  
+  <script type="text/javascript" async="" src="./3D area chart - Area chart sample_files/ga.js"></script><script type="text/javascript">
+    chartType = "area";
+    loadType = "sample";
+  </script>
+  
+  <script type="text/javascript" src="./3D area chart - Area chart sample_files/settings.js"></script>
+  <script type="text/javascript">
+    staticUrl = "/static/";
+    chartTitle = "Area chart sample"
+  </script>
+  
+  
+  <script type="text/javascript" src="./3D area chart - Area chart sample_files/InputDataArea.js"></script>
+  
+  <script type="text/javascript" src="./3D area chart - Area chart sample_files/jquery-1.7.1.js"></script>
+  <script type="text/javascript" src="./3D area chart - Area chart sample_files/jquery-ui.js"></script>
+  <script type="text/javascript" src="./3D area chart - Area chart sample_files/jquery.jeditable.mini.js"></script>
+  <script type="text/javascript" src="./3D area chart - Area chart sample_files/jquery.colorpicker.js"></script>
+  <script type="text/javascript" src="./3D area chart - Area chart sample_files/jquery.tablesheet.js"></script>
+  
+    <script type="text/javascript" src="./3D area chart - Area chart sample_files/three.min.js"></script>
+  
+  <script type="text/javascript" src="./3D area chart - Area chart sample_files/TrackballControls.js"></script>
+  <script type="text/javascript" src="./3D area chart - Area chart sample_files/TrackballControlsTouch.js"></script>
+  <script type="text/javascript" src="./3D area chart - Area chart sample_files/utils.js"></script>
+  
+    <script type="text/javascript" src="./3D area chart - Area chart sample_files/NiceScale.js"></script>
+  
+    <script type="text/javascript" src="./3D area chart - Area chart sample_files/AreaPolies.js"></script>
+  
+    <script type="text/javascript" src="./3D area chart - Area chart sample_files/ScaleTexts.js"></script>
+  
+  <script type="text/javascript" src="./3D area chart - Area chart sample_files/helvetiker_bold.typeface.js"></script>
+  <script type="text/javascript" src="./3D area chart - Area chart sample_files/scene_area.js"></script>
+  <script type="text/javascript">
+    
+    backColor='000000';scaleTextColor='eeeeee';valTextColor="ffffff";valHeight=600;
+    
+  </script>
+  <script type="text/javascript" src="./3D area chart - Area chart sample_files/init.js"></script><div class="ui-dialog ui-widget ui-widget-content ui-corner-all datadialog ui-resizable" tabindex="-1" role="dialog" aria-labelledby="ui-dialog-title-div-databox" style="display: none; z-index: 1006; outline: 0px; position: absolute; height: auto; width: 600px; top: 148px; left: 88px;"><div class="ui-dialog-titlebar ui-widget-header ui-corner-all ui-helper-clearfix"><span class="ui-dialog-title" id="ui-dialog-title-div-databox">Edit your data</span><a href="http://threegraphs.com/charts/sample/area/#" class="ui-dialog-titlebar-close ui-corner-all" role="button"><span class="ui-icon ui-icon-closethick">close</span></a></div><div id="div-databox" class="ui-dialog-content ui-widget-content" scrolltop="0" scrollleft="0" style="display: block; width: auto; min-height: 0px; height: 385.6px;">
+  <h3>Edit Settings</h3>
+  <h4>General Settings</h4>
+  <div class="left col1-4 small-text">
+    Title: <input type="text" id="charttitle" size="12">
+  </div>
+  <div class="left col1-4 small-text">
+    Background color: 
+    <input id="colorpick_bc" type="text" size="4" value="000000" style="display: none;"><button type="button" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only" role="button" aria-disabled="false"><span class="ui-button-text"><img src="./3D area chart - Area chart sample_files/ui-colorpicker.png" alt="Color" title="Color" style="background-color: rgb(0, 0, 0);"></span></button>
+  </div>
+  <div class="left col1-4 small-text">
+    Scale text color:
+    <input id="colorpick_stc" type="text" size="4" value="ffffff" style="display: none;"><button type="button" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only" role="button" aria-disabled="false"><span class="ui-button-text"><img src="./3D area chart - Area chart sample_files/ui-colorpicker.png" alt="Color" title="Color" style="background-color: rgb(255, 255, 255);"></span></button>
+  </div>
+  <div class="left col1-4 small-text">
+    Value text color:
+    <input id="colorpick_vt" type="text" size="4" value="ffffff" style="display: none;"><button type="button" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only" role="button" aria-disabled="false"><span class="ui-button-text"><img src="./3D area chart - Area chart sample_files/ui-colorpicker.png" alt="Color" title="Color" style="background-color: rgb(255, 255, 255);"></span></button>
+  </div>
+  <div class="clear"></div>
+  <h4>Chart Data</h4>
+  <table id="datatable" class="jqueryTableSheet">
+  <tbody><tr><td class="rowcol" style="padding:0"><div class="addremove" style="text-align:right;"><img id="jtsheet_addCol" src="./3D area chart - Area chart sample_files/add2.png"><br><img id="jtsheet_remCol" src="./3D area chart - Area chart sample_files/rem1.png"></div><div style="clear:both;"></div><div class="addremove" style="margin-top:0"><img id="jtsheet_addRow" src="./3D area chart - Area chart sample_files/add1.png"><img id="jtsheet_remRow" src="./3D area chart - Area chart sample_files/rem2.png"></div></td><td class="rowcol" id="jtsheet_col0"><input id="colorpick0" type="text" size="1" value="d17100" style="display: none;"><button type="button" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only" role="button" aria-disabled="false"><span class="ui-button-text"><img src="./3D area chart - Area chart sample_files/ui-colorpicker.png" alt="Color" title="Color" style="background-color: rgb(209, 113, 0);"></span></button><span>2010</span></td></tr><tr id="jtsheet_row0"><td class="rowcol" id="">Product 1</td><td id="jtsheet_cell0_0" class="cell">541</td></tr><tr id="jtsheet_row1"><td class="rowcol" id="">Product 2</td><td id="jtsheet_cell0_1" class="cell">653</td></tr><tr id="jtsheet_row2"><td class="rowcol" id="">Product 3</td><td id="jtsheet_cell0_2" class="cell">805</td></tr><tr id="jtsheet_row3"><td class="rowcol" id="">Product 4</td><td id="jtsheet_cell0_3" class="cell">150</td></tr><tr id="jtsheet_row4"><td class="rowcol" id="">Product 5</td><td id="jtsheet_cell0_4" class="cell">324</td></tr></tbody></table><div style="height:20px">&nbsp;</div><div id="jtsheet_exportbut" class="exportbut">Generate Chart</div>
+</div><div class="ui-resizable-handle ui-resizable-n"></div><div class="ui-resizable-handle ui-resizable-e"></div><div class="ui-resizable-handle ui-resizable-s"></div><div class="ui-resizable-handle ui-resizable-w"></div><div class="ui-resizable-handle ui-resizable-se ui-icon ui-icon-gripsmall-diagonal-se ui-icon-grip-diagonal-se" style="z-index: 1001;"></div><div class="ui-resizable-handle ui-resizable-sw" style="z-index: 1002;"></div><div class="ui-resizable-handle ui-resizable-ne" style="z-index: 1003;"></div><div class="ui-resizable-handle ui-resizable-nw" style="z-index: 1004;"></div></div><div class="ui-dialog ui-widget ui-widget-content ui-corner-all datadialog" tabindex="-1" role="dialog" aria-labelledby="ui-dialog-title-div-exportbox" style="display: none; z-index: 1004; outline: 0px; height: auto; width: 600px; top: 148px; left: 88px;"><div class="ui-dialog-titlebar ui-widget-header ui-corner-all ui-helper-clearfix"><span class="ui-dialog-title" id="ui-dialog-title-div-exportbox">Export your chart</span><a href="http://threegraphs.com/charts/sample/area/#" class="ui-dialog-titlebar-close ui-corner-all" role="button"><span class="ui-icon ui-icon-closethick">close</span></a></div><div id="div-exportbox" class="ui-dialog-content ui-widget-content" scrolltop="0" scrollleft="0" style="display: block; width: auto; min-height: 0px; height: 385.6px;">
+  <h3>Export chart</h3>
+  <div class="separator_hid10"></div>
+  <div id="link-export-image" class="general-button general-button-b element-centered">
+    Export as image
+  </div>
+  <div id="result-export-image" class="div-results"></div>
+  <div class="separator_hid10"></div>
+  <div id="link-export-embed" class="general-button general-button-b element-centered">
+    Export for the web
+  </div>
+  <div id="result-export-embed" class="div-results"></div>
+  <div class="separator_hid30"></div>
+  <div class="separator_big_h"></div>
+  <div class="separator_hid10"></div>
+  <div id="link-export-close" class="general-button general-button-b element-centered">
+    Cancel
+  </div>
+</div></div><div class="ui-colorpicker ui-colorpicker-dialog ui-dialog ui-widget ui-widget-content ui-corner-all" style="display: none;"></div><div class="ui-colorpicker ui-colorpicker-dialog ui-dialog ui-widget ui-widget-content ui-corner-all" style="display: none;"></div><div class="ui-colorpicker ui-colorpicker-dialog ui-dialog ui-widget ui-widget-content ui-corner-all" style="display: none;"></div><div class="ui-colorpicker ui-colorpicker-dialog ui-dialog ui-widget ui-widget-content ui-corner-all" style="display: none;"></div>
+  
+  <script type="text/javascript">
+
+    var _gaq = _gaq || [];
+    _gaq.push(['_setAccount', 'UA-37934027-1']);
+    _gaq.push(['_trackPageview']);
+
+    (function() {
+      var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+      ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+    })();
+
+  </script>
+
+
+
+<canvas width="526" height="658"></canvas></body></html>
