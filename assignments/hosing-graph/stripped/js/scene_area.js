@@ -463,4 +463,14 @@ function animateScene() {
 
     renderer.render(scene, camera);
 
+    /** for updating the position **/
+    areas[0].barobj.position.y = dataValues[0][0];
+    areas[1].barobj.position.y = dataValues[0][1];
+    areas[2].barobj.position.y = dataValues[0][2];
+    areas[3].barobj.position.y = dataValues[0][3];
+
+    areas[4].barobj.position.y = dataValues[1][0];
+    areas[5].barobj.position.y = dataValues[1][1];
+    areas[6].barobj.position.y = dataValues[1][2];
+    areas[7].barobj.position.y = dataValues[1][3];
 }

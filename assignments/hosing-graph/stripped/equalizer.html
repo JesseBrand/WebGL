@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<!-- saved from url=(0042)http://threegraphs.com/charts/sample/area/ -->
+<html lang="en">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <title>3D area chart - Area chart sample</title>
+
+    <link rel="stylesheet" href="./css/reset.css">
+    <link rel="stylesheet" href="./css/scenes.css">
+</head>
+
+<body style="background-color: rgb(0, 0, 0);">
+
+
+<div id="valuelabel" style="color: rgb(255, 255, 255);">
+</div>
+
+<script type="text/javascript">
+    chartType = "area";
+    loadType = "sample";
+</script>
+
+<script type="text/javascript" src="./js/settings.js"></script>
+<script type="text/javascript">
+    staticUrl = "";
+    chartTitle = "Area chart sample"
+</script>
+
+
+<script type="text/javascript" src="./js/data/InputDataArea.js"></script>
+
+<script type="text/javascript" src="./js/jquery-1.7.1.js"></script>
+
+<script type="text/javascript" src="./js/three.min.js"></script>
+
+<script type="text/javascript" src="./js/TrackballControls.js"></script>
+<script type="text/javascript" src="./js/TrackballControlsTouch.js"></script>
+<script type="text/javascript" src="./js/utils.js"></script>
+
+<script type="text/javascript" src="./js/NiceScale.js"></script>
+
+<script type="text/javascript" src="./js/AreaPolies.js"></script>
+<script type="text/javascript" src="./js/BarCubes.js"></script>
+<script type="text/javascript" src="./js/DotSphere.js"></script>
+
+<script type="text/javascript" src="./js/ScaleTexts.js"></script>
+
+<script type="text/javascript" src="./js/helvetiker_bold.typeface.js"></script>
+<script type="text/javascript" src="./js/scene_area.js"></script>
+<script type="text/javascript">
+
+    backColor = '000000';
+    scaleTextColor = 'eeeeee';
+    valTextColor = "ffffff";
+    valHeight = 600;
+
+    initScene();
+    animateScene();
+</script>
+<!--<script type="text/javascript" src="./js/init.js"></script>-->
+
+<script type="text/javascript">
+
+
+    var webaudio_tooling_obj = function () {
+
+        var audioContext = new AudioContext();
+
+        console.log("audio is starting up ...");
+
+        var BUFF_SIZE = 16384;
+
+        var audioInput = null,
+                microphone_stream = null,
+                gain_node = null,
+                script_processor_node = null,
+                script_processor_fft_node = null,
+                analyserNode = null;
+
+        if (!navigator.getUserMedia)
+            navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia ||
+                    navigator.mozGetUserMedia || navigator.msGetUserMedia;
+
+        if (navigator.getUserMedia){
+
+            navigator.getUserMedia({audio:true},
+                    function(stream) {
+                        start_microphone(stream);
+                    },
+                    function(e) {
+                        alert('Error capturing audio.');
+                    }
+            );
+
+        } else { alert('getUserMedia not supported in this browser.'); }
+
+        // ---
+
+        function show_some_data(given_typed_array, num_row_to_display, label) {
+
+            var size_buffer = given_typed_array.length;
+            var index = 0;
+            var max_index = num_row_to_display;
+
+            console.log("__________ " + label);
+
+            for (; index < max_index && index < size_buffer; index += 1) {
+
+                console.log(given_typed_array[index]);
+            }
+
+            dataValues[0][0] = given_typed_array[0] * 2;
+            dataValues[0][1] = given_typed_array[1] * 2;
+            dataValues[0][2] = given_typed_array[2] * 2;
+            dataValues[0][3] = given_typed_array[3] * 2;
+
+            dataValues[1][0] = given_typed_array[4] * 2;
+            dataValues[1][1] = given_typed_array[5] * 2;
+            dataValues[1][2] = given_typed_array[6] * 2;
+            dataValues[1][3] = given_typed_array[7] * 2;
+
+            document.getElementById('value').setAttribute("value", given_typed_array[4]);
+
+
+        }
+
+        function process_microphone_buffer(event) {
+
+            var i, N, inp, microphone_output_buffer;
+
+            microphone_output_buffer = event.inputBuffer.getChannelData(0); // just mono - 1 channel for now
+
+            // microphone_output_buffer  <-- this buffer contains current gulp of data size BUFF_SIZE
+
+            show_some_data(microphone_output_buffer, 5, "from getChannelData");
+        }
+
+        function start_microphone(stream){
+
+            gain_node = audioContext.createGain();
+            gain_node.connect( audioContext.destination );
+
+            microphone_stream = audioContext.createMediaStreamSource(stream);
+            microphone_stream.connect(gain_node);
+
+            script_processor_node = audioContext.createScriptProcessor(BUFF_SIZE, 1, 1);
+            script_processor_node.onaudioprocess = process_microphone_buffer;
+
+            microphone_stream.connect(script_processor_node);
+
+            // --- enable volume control for output speakers
+
+            document.getElementById('volume').addEventListener('change', function() {
+
+                var curr_volume = this.value;
+                gain_node.gain.value = curr_volume;
+
+                console.log("curr_volume ", curr_volume);
+            });
+
+            // --- setup FFT
+
+            script_processor_fft_node = audioContext.createScriptProcessor(2048, 1, 1);
+            script_processor_fft_node.connect(gain_node);
+
+            analyserNode = audioContext.createAnalyser();
+            analyserNode.smoothingTimeConstant = 0;
+            analyserNode.fftSize = 2048;
+
+            microphone_stream.connect(analyserNode);
+
+            analyserNode.connect(script_processor_fft_node);
+
+            script_processor_fft_node.onaudioprocess = function() {
+
+                // get the average for the first channel
+                var array = new Uint8Array(analyserNode.frequencyBinCount);
+                analyserNode.getByteFrequencyData(array);
+
+                // draw the spectrogram
+                if (microphone_stream.playbackState == microphone_stream.PLAYING_STATE) {
+
+                    show_some_data(array, 5, "from fft");
+                }
+            };
+        }
+
+    }(); //  webaudio_tooling_obj = function()
+
+
+
+</script>
+<p>Volume</p>
+<input id="volume" type="range" min="0" max="1" step="0.1" value="0.5"/>
+<input id="value" type="input"/>
+<canvas width="526" height="658"></canvas>
+</body>
+</html>
