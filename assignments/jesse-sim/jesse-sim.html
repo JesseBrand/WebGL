@@ -1,0 +1,240 @@
+<html>
+	<head>
+		<script type="text/javascript" src="../../lib/three.js"></script>
+		<script type="text/javascript" src="../../lib/OrbitControls.js"></script>
+		<script type="text/javascript" src="controls.js"></script>
+		<script type="text/javascript" src="pointerlock.js"></script>
+		<script type="text/javascript" src="keyhandler.js"></script>
+		<script type="text/javascript" src="ImprovedNoise.js"></script>
+		<script type="text/javascript">
+
+var width = 1570;
+var height = 500;
+
+
+var scene;
+var cssScene;
+var camera;
+var renderer;
+var cssRenderer;
+var ship;
+
+var worldWidth = 1024;
+var worldDepth = 1024;
+
+var moveForward;
+var moveBackward;
+var moveUp;
+var moveDown;
+var moveLeft;
+var moveRight;
+var pause = false;
+
+var velocity = new THREE.Vector3();
+
+function init() {
+	scene = new THREE.Scene();
+	cssScene = new THREE.Scene();
+	
+	camera = new THREE.PerspectiveCamera(90, width / height, .1, 1000);
+	
+//	createCssRenderer();
+	createGLRenderer();
+	
+	addDebug(scene);
+	
+	addTerrain(scene);
+
+	addLights(scene);
+	
+	addBrighterBusiness(scene);
+	
+//	initOrbitControls(camera, renderer, scene);
+	initMyControls(camera, renderer, scene);
+	
+	render();
+}
+
+function createGLRenderer() {
+	renderer = new THREE.WebGLRenderer();
+	
+	renderer.setSize(width, height);
+	
+	document.body.appendChild(renderer.domElement);
+	
+//    renderer.domElement.style.position = 'absolute';
+//    renderer.domElement.style.zIndex = 1;
+//    renderer.domElement.style.top = 0;
+	
+	renderer.shadowMap.enabled = true; 
+	renderer.gammaOutput = true; 
+}
+
+function createCssRenderer() {
+    cssRenderer = new THREE.CSS3DRenderer();
+	
+    cssRenderer.setSize(window.innerWidth, window.innerHeight);
+	
+	document.body.appendChild(cssRenderer.domElement);
+	
+    cssRenderer.domElement.style.position = 'absolute';
+    cssRenderer.domElement.style.zIndex = 0;
+    cssRenderer.domElement.style.top = 0;
+}
+
+function initOrbitControls(camera, renderer, scene) {
+	controls = new THREE.OrbitControls( camera, renderer.domElement );
+}
+
+function initMyControls(camera, renderer, scene) {
+	document.addEventListener( 'keydown', keyDownHandler, false );
+	document.addEventListener( 'keyup', keyUpHandler, false );
+	
+	controls = new THREE.MyControls( camera );
+	ship = controls.getObject();
+	ship.position.set(30, 60, 60);
+	scene.add(ship);
+	
+	var light = new THREE.PointLight(0xffffff, 1, 100);
+	ship.add(light);
+
+	initPointerLock(controls);
+}
+
+
+function addDebug(scene) {
+	var axisHelper = new THREE.AxisHelper( 5 );
+	scene.add( axisHelper );
+}
+
+function addLights(scene) {
+	scene.add(new THREE.AmbientLight(0x101020));
+	
+	var light = new THREE.PointLight(0x303010, 1, 1000);
+	light.position.set(0, 500, 100);
+	scene.add(light);
+}
+
+function addBrighterBusiness(scene) {
+	var planeMat = new THREE.MeshBasicMaterial({ wireframe: true, color: 0xffffff });
+	var planeGeo = new THREE.PlaneGeometry(1, 1);
+	var planeMesh = new THREE.Mesh( planeGeo, planeMat );
+	planeMesh.scale.set(100, 100, 1);
+	scene.add(planeMesh);
+
+	// http://adndevblog.typepad.com/cloud_and_mobile/2015/07/embedding-webpages-in-a-3d-threejs-scene.html
+	
+//	var element = document.createElement( 'iframe' );
+//	element.src = 'http://localhost:8100/';
+//	var cssObject = new THREE.CSS3DObject( element );
+//	cssObject.position = planeMesh.position;
+//	cssObject.rotation = planeMesh.rotation;
+//	cssScene.add(cssObject);
+//	var cssRenderer = new THREE.CSS3DRenderer();
+//	cssRenderer.setSize(width, height);
+//	cssRenderer.domElement.style.position = 'absolute';
+//	cssRenderer.domElement.style.top = 0;
+}
+
+function addTerrain(scene) {
+	var data = generateHeight( worldWidth, worldDepth );
+	var geometry = new THREE.PlaneBufferGeometry( worldWidth, worldDepth, worldWidth - 1, worldDepth - 1 );
+	geometry.rotateX( - Math.PI / 2 );
+	var vertices = geometry.attributes.position.array;
+	for ( var i = 0, j = 0, l = vertices.length; i < l; i ++, j += 3 ) {
+		vertices[ j + 1 ] = data[ i ];
+	}
+	var world = new THREE.Mesh( geometry, new THREE.MeshPhongMaterial({color: 0xd06020}));
+
+	scene.add(world);
+}
+
+function generateHeight( width, height ) {
+	var size = width * height, data = new Uint8Array( size );
+	var perlin = new ImprovedNoise();
+	var quality = 64;
+	var passes = 4;
+	var heightFactor = .5;
+	var z = Math.random() * 100;
+	for ( var j = 0; j < passes; j ++ ) {
+		for ( var i = 0; i < size; i ++ ) {
+			var x = i % width;
+			var y = ~~ ( i / width );
+			data[ i ] += Math.abs( perlin.noise( x / quality, y / quality, z ) * quality * heightFactor);
+		}
+		quality /= 2;
+	}
+	return data;
+}
+
+function render() {
+	requestAnimationFrame(render);
+
+//	var carMatrix = new THREE.Matrix4();
+//	carMatrix.makeTranslation(.02, 0, 0);
+//	car.position.applyMatrix4(carMatrix);
+
+	animateCamera();
+
+	renderer.render(scene, camera);
+//	cssRenderer.render(cssScene, camera);
+}
+
+function animateCamera() {
+	velocity.set(0, 0, 0);
+	if (moveForward) {
+		velocity.z--;
+	}
+	if (moveBackward) {
+		velocity.z++;
+	}
+	if (moveLeft) {
+		velocity.x--;
+	}
+	if (moveRight) {
+		velocity.x++;
+	}
+	if (moveDown) {
+		velocity.y--;
+	}
+	if (moveUp) {
+		velocity.y++;
+	}
+	if (pause) {
+		debugger;
+	}
+	ship.translateX(velocity.x);
+	ship.translateY(velocity.y);
+	ship.translateZ(velocity.z);
+}
+
+		</script>
+		<style>
+
+html, body {
+	width: 100%;
+	height: 100%;
+}
+		
+#blocker {
+	position: absolute;
+	width: 100%;
+	height: 100%;
+	background-color: rgba(0,0,0,0.5);
+}
+
+#instructions {
+	width: 100%;
+	height: 100%;
+}
+		</style>
+	</head>
+	<body onload="init()" style="background-color:black">
+	
+		<div id="blocker">
+
+			<div id="instructions">Click here</div>
+
+		</div>
+	</body>
+</html>
