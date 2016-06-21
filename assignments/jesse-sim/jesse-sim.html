@@ -6,6 +6,7 @@
 		<script type="text/javascript" src="pointerlock.js"></script>
 		<script type="text/javascript" src="keyhandler.js"></script>
 		<script type="text/javascript" src="ImprovedNoise.js"></script>
+		<script type="text/javascript" src="stereo.js"></script>
 		<script type="text/javascript">
 
 var width = 1570;
@@ -15,6 +16,7 @@ var height = 500;
 var scene;
 var cssScene;
 var camera;
+var stereo;
 var renderer;
 var cssRenderer;
 var ship;
@@ -68,6 +70,8 @@ function createGLRenderer() {
 	
 	renderer.shadowMap.enabled = true; 
 	renderer.gammaOutput = true; 
+
+	stereo = new THREE.StereoEffect(renderer);
 }
 
 function createCssRenderer() {
@@ -176,7 +180,7 @@ function render() {
 
 	animateCamera();
 
-	renderer.render(scene, camera);
+	stereo.render(scene, camera);
 //	cssRenderer.render(cssScene, camera);
 }
 
