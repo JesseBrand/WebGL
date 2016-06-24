@@ -1,5 +1,6 @@
 <html>
 	<head>
+		<link href="style.css" rel="stylesheet" />
 		<script type="text/javascript" src="../../lib/three.js"></script>
 		<script type="text/javascript" src="../../lib/OrbitControls.js"></script>
 		<script type="text/javascript" src="controls.js"></script>
@@ -7,18 +8,26 @@
 		<script type="text/javascript" src="keyhandler.js"></script>
 		<script type="text/javascript" src="ImprovedNoise.js"></script>
 		<script type="text/javascript" src="stereo.js"></script>
+		<script type="text/javascript" src="CSS3DRenderer.js"></script>
 		<script type="text/javascript">
 
-var width = 1570;
-var height = 500;
+var vr = false;
 
+var siteScaleFactor = 10;
 
-var scene;
-var cssScene;
+var width = vr ? 800 : 1600;
+var height = vr ? 400 : 753;
+
 var camera;
-var stereo;
-var renderer;
+
+var glScene;
+var glRenderer;
+var glCameraView;
+
+var cssScene;
 var cssRenderer;
+var cssCameraView;
+
 var ship;
 
 var worldWidth = 1024;
@@ -35,13 +44,19 @@ var pause = false;
 var velocity = new THREE.Vector3();
 
 function init() {
-	scene = new THREE.Scene();
-	cssScene = new THREE.Scene();
 	
 	camera = new THREE.PerspectiveCamera(90, width / height, .1, 1000);
 	
-//	createCssRenderer();
+	createCssRenderer();
 	createGLRenderer();
+		
+//	document.body.appendChild(glRenderer.domElement);
+	
+	document.body.appendChild(cssRenderer.domElement);
+	cssRenderer.domElement.appendChild(glRenderer.domElement);
+	
+	document.getElementById('blocker').style.width = width;
+	document.getElementById('blocker').style.height = height;
 	
 	addDebug(scene);
 	
@@ -51,46 +66,48 @@ function init() {
 	
 	addBrighterBusiness(scene);
 	
-//	initOrbitControls(camera, renderer, scene);
-	initMyControls(camera, renderer, scene);
-	
+//	initOrbitControls(camera, glRenderer, scene);
+	initMyControls(camera, glRenderer, scene);
+
 	render();
 }
 
 function createGLRenderer() {
-	renderer = new THREE.WebGLRenderer();
+	scene = new THREE.Scene();
 	
-	renderer.setSize(width, height);
+	glRenderer = new THREE.WebGLRenderer({alpha: true});
+	glRenderer.setSize(width, height);
+	glRenderer.domElement.id = 'glRenderer';
 	
-	document.body.appendChild(renderer.domElement);
-	
-//    renderer.domElement.style.position = 'absolute';
-//    renderer.domElement.style.zIndex = 1;
-//    renderer.domElement.style.top = 0;
-	
-	renderer.shadowMap.enabled = true; 
-	renderer.gammaOutput = true; 
+	glRenderer.shadowMap.enabled = true; 
+	glRenderer.gammaOutput = true; 
 
-	stereo = new THREE.StereoEffect(renderer);
+	if (vr) {
+		glCameraView = new THREE.StereoEffect(glRenderer, 10);
+	} else {
+		glCameraView = glRenderer;
+	}
 }
 
 function createCssRenderer() {
+	cssScene = new THREE.Scene();
+	
     cssRenderer = new THREE.CSS3DRenderer();
+    cssRenderer.setSize(width, height);
+	cssRenderer.domElement.id = 'cssRenderer';
 	
-    cssRenderer.setSize(window.innerWidth, window.innerHeight);
-	
-	document.body.appendChild(cssRenderer.domElement);
-	
-    cssRenderer.domElement.style.position = 'absolute';
-    cssRenderer.domElement.style.zIndex = 0;
-    cssRenderer.domElement.style.top = 0;
+	if (vr) {
+		cssCameraView = new THREE.StereoEffectCSS(cssRenderer, 10);
+	} else {
+		cssCameraView = cssRenderer;
+	}
 }
 
-function initOrbitControls(camera, renderer, scene) {
-	controls = new THREE.OrbitControls( camera, renderer.domElement );
+function initOrbitControls(camera, glRenderer, scene) {
+	controls = new THREE.OrbitControls( camera, glRenderer.domElement );
 }
 
-function initMyControls(camera, renderer, scene) {
+function initMyControls(camera, glRenderer, scene) {
 	document.addEventListener( 'keydown', keyDownHandler, false );
 	document.addEventListener( 'keyup', keyUpHandler, false );
 	
@@ -104,6 +121,11 @@ function initMyControls(camera, renderer, scene) {
 
 	initPointerLock(controls);
 }
+function switchCursorMode() {
+	if (controls.switchCursorMode) {
+		controls.switchCursorMode();
+	}
+}
 
 
 function addDebug(scene) {
@@ -112,32 +134,41 @@ function addDebug(scene) {
 }
 
 function addLights(scene) {
-	scene.add(new THREE.AmbientLight(0x101020));
+//	scene.add(new THREE.AmbientLight(0x050510));
 	
-	var light = new THREE.PointLight(0x303010, 1, 1000);
+	var light = new THREE.PointLight(0x303020, 1, 500);
 	light.position.set(0, 500, 100);
 	scene.add(light);
 }
 
 function addBrighterBusiness(scene) {
-	var planeMat = new THREE.MeshBasicMaterial({ wireframe: true, color: 0xffffff });
-	var planeGeo = new THREE.PlaneGeometry(1, 1);
-	var planeMesh = new THREE.Mesh( planeGeo, planeMat );
-	planeMesh.scale.set(100, 100, 1);
+	add3DPage(scene, 'http://www.nu.nl', 100, 100, new THREE.Vector3(0, 0, 0), new THREE.Vector3(0, 0, 0));
+}
+
+function add3DPage(scene, url, width, height, position, rotation) {
+	var planeMat = new THREE.MeshBasicMaterial({ opacity: 0.0, color: 0x000000 });
+	var planeGeo = new THREE.PlaneGeometry(width, height);
+	var planeMesh = new THREE.Mesh(planeGeo, planeMat);
+	planeMesh.position = position;
+	planeMesh.rotation = rotation;
 	scene.add(planeMesh);
 
 	// http://adndevblog.typepad.com/cloud_and_mobile/2015/07/embedding-webpages-in-a-3d-threejs-scene.html
 	
-//	var element = document.createElement( 'iframe' );
-//	element.src = 'http://localhost:8100/';
-//	var cssObject = new THREE.CSS3DObject( element );
-//	cssObject.position = planeMesh.position;
-//	cssObject.rotation = planeMesh.rotation;
-//	cssScene.add(cssObject);
-//	var cssRenderer = new THREE.CSS3DRenderer();
-//	cssRenderer.setSize(width, height);
-//	cssRenderer.domElement.style.position = 'absolute';
-//	cssRenderer.domElement.style.top = 0;
+	var siteWidth = width * siteScaleFactor;
+	var siteHeight = height * siteScaleFactor;
+	var element = document.createElement('iframe');
+	element.src = url;
+	element.width = siteWidth;
+	element.height = siteHeight;
+	element.style = 'width:"' + siteWidth + 'px"; height:"' + siteHeight + 'px"';
+	var cssObject = new THREE.CSS3DObject(element);
+	cssObject.position = planeMesh.position;
+	cssObject.rotation = planeMesh.rotation;
+	cssObject.scale.x /= siteScaleFactor;
+	cssObject.scale.y /= siteScaleFactor;
+	cssObject.scale.z /= siteScaleFactor;
+	cssScene.add(cssObject);
 }
 
 function addTerrain(scene) {
@@ -174,14 +205,10 @@ function generateHeight( width, height ) {
 function render() {
 	requestAnimationFrame(render);
 
-//	var carMatrix = new THREE.Matrix4();
-//	carMatrix.makeTranslation(.02, 0, 0);
-//	car.position.applyMatrix4(carMatrix);
-
 	animateCamera();
 
-	stereo.render(scene, camera);
-//	cssRenderer.render(cssScene, camera);
+	glCameraView.render(scene, camera);
+	cssCameraView.render(cssScene, camera);
 }
 
 function animateCamera() {
@@ -213,27 +240,8 @@ function animateCamera() {
 }
 
 		</script>
-		<style>
-
-html, body {
-	width: 100%;
-	height: 100%;
-}
-		
-#blocker {
-	position: absolute;
-	width: 100%;
-	height: 100%;
-	background-color: rgba(0,0,0,0.5);
-}
-
-#instructions {
-	width: 100%;
-	height: 100%;
-}
-		</style>
 	</head>
-	<body onload="init()" style="background-color:black">
+	<body onload="init()">
 	
 		<div id="blocker">
 
