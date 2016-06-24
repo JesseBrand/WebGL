@@ -1,6 +1,6 @@
-function keyDownHandler( event ) {
+function keyDownHandler(event) {
 //	console.log('down', event.keyCode);
-	switch ( event.keyCode ) {
+	switch(event.keyCode) {
 		case 38: // up
 		case 87: // w
 			moveForward = true;
@@ -17,20 +17,19 @@ function keyDownHandler( event ) {
 		case 68: // d
 			moveRight = true;
 			break;
-		case 17: // ctrl
+		case 16: // shift
 			moveDown = true;
-			break;
-		case 80: // p
-			pause = true;
 			break;
 		case 32: // space
 			moveUp = true;
 			break;
+		case 80: // p
+			pause = true;
+			break;
 	}
 };
 
-function keyUpHandler( event ) {
-//	console.log('up', event.keyCode);
+function keyUpHandler(event) {
 	switch( event.keyCode ) {
 		case 38: // up
 		case 87: // w
@@ -48,8 +47,11 @@ function keyUpHandler( event ) {
 		case 68: // d
 			moveRight = false;
 			break;
-		case 17: // ctrl
+		case 16: // shift
 			moveDown = false;
+			break;
+		case 17: // ctrl
+			switchCursorMode();
 			break;
 		case 80: // p
 			pause = false;
