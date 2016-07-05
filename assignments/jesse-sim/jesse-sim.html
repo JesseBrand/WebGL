@@ -3,17 +3,16 @@
 		<link href="style.css" rel="stylesheet" />
 		<script type="text/javascript" src="../../lib/three.js"></script>
 		<script type="text/javascript" src="../../lib/OrbitControls.js"></script>
+		<script type="text/javascript" src="CSS3DRenderer.js"></script>
+		<script type="text/javascript" src="SubdivisionModifier.js"></script>
 		<script type="text/javascript" src="controls.js"></script>
 		<script type="text/javascript" src="pointerlock.js"></script>
 		<script type="text/javascript" src="keyhandler.js"></script>
 		<script type="text/javascript" src="ImprovedNoise.js"></script>
 		<script type="text/javascript" src="stereo.js"></script>
-		<script type="text/javascript" src="CSS3DRenderer.js"></script>
 		<script type="text/javascript">
 
 var vr = false;
-
-var siteScaleFactor = 10;
 
 var width = vr ? 800 : 1600;
 var height = vr ? 400 : 753;
@@ -31,6 +30,7 @@ var cssCameraView;
 var ship;
 
 var worldWidth = 1024;
+var worldHeight = 1024;
 var worldDepth = 1024;
 
 var moveForward;
@@ -60,11 +60,15 @@ function init() {
 	
 	addDebug(scene);
 	
+	addSkybox(scene);
+	
 	addTerrain(scene);
 
 	addLights(scene);
-	
-	addBrighterBusiness(scene);
+
+//	addDebugPages(scene);
+//	addWebPages(scene);
+	addMingPages(scene);
 	
 //	initOrbitControls(camera, glRenderer, scene);
 	initMyControls(camera, glRenderer, scene);
@@ -80,6 +84,7 @@ function createGLRenderer() {
 	glRenderer.domElement.id = 'glRenderer';
 	
 	glRenderer.shadowMap.enabled = true; 
+	glRenderer.shadowMap.soft = true; 
 	glRenderer.gammaOutput = true; 
 
 	if (vr) {
@@ -136,24 +141,85 @@ function addDebug(scene) {
 function addLights(scene) {
 //	scene.add(new THREE.AmbientLight(0x050510));
 	
-	var light = new THREE.PointLight(0x303020, 1, 500);
-	light.position.set(0, 500, 100);
-	scene.add(light);
+//	var light = new THREE.PointLight(0x303020, 1, 500);
+//	light.position.set(0, 500, 100);
+//	scene.add(light);
+	
+	var sun = new THREE.DirectionalLight( 0xffffe0 );
+	sun.position.set( 100, 50, 0 );
+	sun.target.position.set(0, 0, 0);
+	sun.castShadow = true;
+	sun.shadow.camera.near = -500;
+	sun.shadow.camera.far = 500;
+	sun.shadow.camera.left = -500;
+	sun.shadow.camera.right = 500;
+	sun.shadow.camera.top = 500;
+	sun.shadow.camera.bottom = -500;
+	sun.shadow.mapSize.width = 1024
+	sun.shadow.mapSize.height = 1024
+	scene.add(sun);
+//	scene.add(new THREE.CameraHelper( sun.shadow.camera ) );
 }
 
-function addBrighterBusiness(scene) {
-	add3DPage(scene, 'http://www.nu.nl', 100, 100, new THREE.Vector3(0, 0, 0), new THREE.Vector3(0, 0, 0));
+function addDebugPages(scene) {
+	add3DPage(scene, 'https://www.ing.nl/zakelijk/index.html', 100, 100, new THREE.Vector3(100, 50, -50), new THREE.Vector3(0, -Math.PI / 4, 0), 10);
+	add3DPage(scene, 'file:///C:/Projects/other/WebGL/assignments/jesse-galaxy/jesse-galaxy.html', 100, 100, new THREE.Vector3(0, 50, -100), new THREE.Vector3(0, 0, 0), 10);
+	add3DPage(scene, 'https://www.google.com', 100, 100, new THREE.Vector3(-100, 50, -50), new THREE.Vector3(0, Math.PI / 4, 0), 10);
 }
 
-function add3DPage(scene, url, width, height, position, rotation) {
+function addWebPages(scene) {
+	add3DPage(scene, 'https://www.ing.nl/zakelijk/index.html', 100, 100, new THREE.Vector3(100, 50, -50), new THREE.Vector3(0, -Math.PI / 4, 0), 10);
+	add3DPage(scene, 'http://www.nu.nl', 100, 100, new THREE.Vector3(0, 50, -100), new THREE.Vector3(0, 0, 0), 10);
+	add3DPage(scene, 'https://www.google.com', 100, 100, new THREE.Vector3(-100, 50, -50), new THREE.Vector3(0, Math.PI / 4, 0), 10);
+}
+
+function addMingPages(scene) {
+
+	// var el = document.createElement('div');el.innerHTML = '<iframe src="https://bankieren.mijnzakelijk.ing.nl/zakelijk/betalen/overschrijven/index">';document.getElementById('search-form').appendChild(el);
+
+	add3DPage(scene, 'https://bankieren.mijnzakelijk.ing.nl/zakelijk/ing360/index', 100, 100, new THREE.Vector3(100, 50, -50), new THREE.Vector3(0, -Math.PI / 4, 0), 10);
+	add3DPage(scene, 'https://bankieren.mijnzakelijk.ing.nl/zakelijk/betalen/overschrijven/index', 100, 100, new THREE.Vector3(0, 50, -100), new THREE.Vector3(0, 0, 0), 10);
+	add3DPage(scene, 'https://bankieren.mijnzakelijk.ing.nl/zakelijk/brighterbusiness/index', 100, 100, new THREE.Vector3(-100, 50, -50), new THREE.Vector3(0, Math.PI / 4, 0), 10);
+}
+
+function addSkybox(scene) {
+	var cubeMat = new THREE.MeshBasicMaterial({ color: 0x1040d0 });
+	cubeMat.side = THREE.BackSide;
+	var cubeGeo = new THREE.CubeGeometry(worldWidth, worldHeight, worldDepth);
+	var cubeMesh = new THREE.Mesh(cubeGeo, cubeMat);
+	cubeMesh.position.y = worldHeight / 2 - .1;
+	scene.add(cubeMesh);
+}
+
+function add3DPage(scene, url, width, height, position, rotation, siteScaleFactor) {
+	var cubeMat = new THREE.MeshPhongMaterial({ color: 0x555555 });
+	var thickness = width * height / 800;
+	var cubeGeo = new THREE.CubeGeometry(width * 1.1, height * 1.1, thickness);
+	var cubeMesh = new THREE.Mesh(cubeGeo, cubeMat);
+	cubeMesh.position.x = position.x;
+	cubeMesh.position.y = position.y;
+	cubeMesh.position.z = position.z;
+	cubeMesh.rotation.x = rotation.x;
+	cubeMesh.rotation.y = rotation.y;
+	cubeMesh.rotation.z = rotation.z;
+	var dist = Math.sqrt(position.x * position.x + position.z * position.z);
+	var ratio = (dist + thickness / 2 + 1) / dist;
+	var matrix = new THREE.Matrix4();
+	matrix.makeScale(ratio, 1, ratio);
+	cubeMesh.position.applyMatrix4(matrix);
+
+	scene.add(cubeMesh);
+	
 	var planeMat = new THREE.MeshBasicMaterial({ opacity: 0.0, color: 0x000000 });
 	var planeGeo = new THREE.PlaneGeometry(width, height);
 	var planeMesh = new THREE.Mesh(planeGeo, planeMat);
-	planeMesh.position = position;
-	planeMesh.rotation = rotation;
+	planeMesh.position.x = position.x;
+	planeMesh.position.y = position.y;
+	planeMesh.position.z = position.z;
+	planeMesh.rotation.x = rotation.x;
+	planeMesh.rotation.y = rotation.y;
+	planeMesh.rotation.z = rotation.z;
 	scene.add(planeMesh);
-
-	// http://adndevblog.typepad.com/cloud_and_mobile/2015/07/embedding-webpages-in-a-3d-threejs-scene.html
 	
 	var siteWidth = width * siteScaleFactor;
 	var siteHeight = height * siteScaleFactor;
@@ -163,8 +229,12 @@ function add3DPage(scene, url, width, height, position, rotation) {
 	element.height = siteHeight;
 	element.style = 'width:"' + siteWidth + 'px"; height:"' + siteHeight + 'px"';
 	var cssObject = new THREE.CSS3DObject(element);
-	cssObject.position = planeMesh.position;
-	cssObject.rotation = planeMesh.rotation;
+	cssObject.position.x = position.x;
+	cssObject.position.y = position.y;
+	cssObject.position.z = position.z;
+	cssObject.rotation.x = rotation.x;
+	cssObject.rotation.y = rotation.y;
+	cssObject.rotation.z = rotation.z;
 	cssObject.scale.x /= siteScaleFactor;
 	cssObject.scale.y /= siteScaleFactor;
 	cssObject.scale.z /= siteScaleFactor;
@@ -179,7 +249,13 @@ function addTerrain(scene) {
 	for ( var i = 0, j = 0, l = vertices.length; i < l; i ++, j += 3 ) {
 		vertices[ j + 1 ] = data[ i ];
 	}
-	var world = new THREE.Mesh( geometry, new THREE.MeshPhongMaterial({color: 0xd06020}));
+
+	geometry.computeFaceNormals();
+	geometry.computeVertexNormals();
+	
+	var world = new THREE.Mesh( geometry, new THREE.MeshPhongMaterial({color: 0x60d020}));
+	world.castShadow = true;
+	world.receiveShadow = false;
 
 	scene.add(world);
 }
@@ -187,9 +263,9 @@ function addTerrain(scene) {
 function generateHeight( width, height ) {
 	var size = width * height, data = new Uint8Array( size );
 	var perlin = new ImprovedNoise();
-	var quality = 64;
+	var quality = 256;
 	var passes = 4;
-	var heightFactor = .5;
+	var heightFactor = .25;
 	var z = Math.random() * 100;
 	for ( var j = 0; j < passes; j ++ ) {
 		for ( var i = 0; i < size; i ++ ) {
