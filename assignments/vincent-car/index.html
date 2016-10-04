@@ -1,0 +1,123 @@
+<html>
+	<head>
+		<title>Woehoe WebGL!</title>
+		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/5.0.0/normalize.min.css" />
+		<script type="text/javascript" src="../../lib/three.js"></script>
+		<script type="text/javascript">
+
+function init() {
+	// Prepare the scene
+	const width = window.innerWidth;
+	const height = window.innerHeight;
+	const accelleration = 0.02;
+
+	const carLength = 6;
+	const carWidth = 4;
+	const carHeight = 2;
+
+	const scene = new THREE.Scene();
+	const camera = new THREE.PerspectiveCamera(75, width / height, 1, 1000);
+
+	// Add objects to the scene
+	const body = createCube();
+
+
+	const frontWheelRight = createWheel();
+	frontWheelRight.position.x = carWidth * -0.5;
+	frontWheelRight.position.y = carHeight * -0.5;
+	frontWheelRight.position.z = carLength * 0.3;
+	frontWheelRight.rotation.z = 0.5 * Math.PI;
+	const frontWheelLeft = createWheel();
+	frontWheelLeft.position.x = carWidth * 0.5;
+	frontWheelLeft.position.y = carHeight * -0.5;
+	frontWheelLeft.position.z = carLength * 0.3;
+	frontWheelLeft.rotation.z = 0.5 * Math.PI;
+	const backWheelRight = createWheel();
+	backWheelRight.position.x = carWidth * -0.5;
+	backWheelRight.position.y = carHeight * -0.5;
+	backWheelRight.position.z = carLength * -0.3;
+	backWheelRight.rotation.z = 0.5 * Math.PI;
+	const backWheelLeft = createWheel();
+	backWheelLeft.position.x = carWidth * 0.5;
+	backWheelLeft.position.y = carHeight * -0.5;
+	backWheelLeft.position.z = carLength * -0.3;
+	backWheelLeft.rotation.z = 0.5 * Math.PI;
+
+	// body.rotation.x = 0.5;
+	scene.add(body);
+	scene.add(frontWheelRight);
+	scene.add(frontWheelLeft);
+	scene.add(backWheelRight);
+	scene.add(backWheelLeft);
+
+	const car = new THREE.Object3D();
+	car.add(body);
+	car.add(frontWheelRight);
+	car.add(frontWheelLeft);
+	car.add(backWheelRight);
+	car.add(backWheelLeft);
+	car.position.x = carWidth * -.05;
+	car.position.y = carHeight * -.05;
+	car.position.z = carLength * -3;
+	car.rotation.x = 0.1 * Math.PI;
+	car.rotation.y = 0.1 * Math.PI;
+	// car.receiveShadow = true;
+	// car.castShadow = true;
+	scene.add(car);
+
+	// const ambientLight = new THREE.AmbientLight(0x0000ff, 0.1);
+	const ambientLight = new THREE.AmbientLight(0xccccff, 0.1);
+	scene.add(ambientLight);
+
+	const lamp1 = new THREE.PointLight(0xffffff, 0.5, 100);
+	lamp1.position.x = carWidth * 2;
+	lamp1.position.y = carHeight * 3;
+
+	const lamp2 = new THREE.PointLight(0xffffff, 0.5, 100);
+	lamp2.position.x = carWidth * -2;
+	lamp2.position.y = carHeight * 3;
+
+	scene.add(lamp1);
+	scene.add(lamp2);
+
+	// Set up the canvas
+	const renderer = new THREE.WebGLRenderer();
+	renderer.setSize(width, height);
+	renderer.shadowMap.enabled = true;
+	renderer.gammaOutput.enabled = true;
+
+	document.body.appendChild(renderer.domElement);
+
+	function render(){
+		requestAnimationFrame(render);
+		car.position.x += accelleration * 0.1;
+		car.position.z += accelleration;
+		renderer.render(scene, camera);
+	}
+
+	function createCube(){
+		const material = new THREE.MeshPhongMaterial({ color: 0x00ff00 });
+		const geometry = new THREE.BoxGeometry(carWidth, carHeight, carLength);
+
+		const cube = new THREE.Mesh(geometry, material);
+
+		return cube;
+	}
+
+	function createWheel(){
+		const material = new THREE.MeshPhongMaterial({ color: 0xff0000 });
+		const geometry = new THREE.CylinderGeometry(1, 1, .25, 16);
+
+		const wheel = new THREE.Mesh(geometry, material);
+
+		return wheel;
+	}
+
+	render();
+}
+
+		</script>
+	</head>
+	<body onload="init()">
+	</body>
+</html>
