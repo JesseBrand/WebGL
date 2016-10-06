@@ -1,0 +1,303 @@
+<html>
+<head>
+    <script type="text/javascript" src="../../lib/three.js"></script>
+    <script type="text/javascript">
+
+        var camera, renderer, light1, light2, light3, width, height, scene, wheels, tires;
+
+        var car;
+        function init() {
+
+            width = window.innerWidth;
+            height = window.innerHeight;
+            scene = new THREE.Scene();
+            camera = new THREE.PerspectiveCamera(75, width / height, 1, 1000);
+
+            // zoom out?
+            camera.position.z = 5;
+            camera.position.y = 40;
+            camera.rotation.x = -0.1;
+
+            // create renderer and add to DOM
+            renderer = new THREE.WebGLRenderer();
+            renderer.setSize(width, height);
+            renderer.shadowMap.enabled = true;
+            renderer.gammaOutput = true;
+
+            document.body.appendChild(renderer.domElement);
+
+            var ambient = new THREE.AmbientLight( 0xffffff, 0.1 );
+            scene.add( ambient );
+
+            scene.add(new THREE.AmbientLight(0x00020));
+            light1 = new THREE.PointLight(0xfffdf0, 1, 100);
+            scene.add(light1);
+            light2 = new THREE.PointLight(0xff6200, 1, 150);
+            scene.add(light2);
+            light3 = new THREE.PointLight(0xfefefe, 1, 200);
+            scene.add(light3);
+
+            car = createCar(
+                    [
+                        {x: 50, y: 0, z: 25},
+                        {x: -50, y: 0, z: 25},
+                        {x: 50, y: 0, z: -25},
+                        {x: -50, y: 0, z: -25}
+                    ]
+            );
+            car.position.z = -100;
+
+            scene.add(car);
+
+            render();
+        }
+
+        function createCar(dimensions) {
+
+            var wheelset = createWheels(dimensions);
+            var body = createBody(dimensions);
+            var engine = createEngine(30, 2);
+
+            var car = new THREE.Object3D();
+
+            car.add(body);
+            car.add(wheelset);
+            car.add(engine);
+
+            return car;
+        }
+
+        function createEngine(translationX, translationY) {
+
+            var x = 24, y = 10, z = 18;
+
+            var material = new THREE.MeshPhongMaterial({color: 0x303030});
+            var box = new THREE.BoxGeometry(x, y, z);
+            var body = new THREE.Object3D();
+
+            var cube = new THREE.Mesh(box, material);
+
+            var cylinder = new THREE.CylinderGeometry(6, 6, x, 32);
+            var topLeftCylinder = new THREE.Mesh(cylinder, material);
+            var topRightCylinder = new THREE.Mesh(cylinder, material);
+
+            topLeftCylinder.position.y = 4;
+            topRightCylinder.position.y = 4;
+
+            topLeftCylinder.position.z = -4;
+            topRightCylinder.position.z = 4;
+
+            topLeftCylinder.rotation.z = Math.PI / 2;
+            topRightCylinder.rotation.z = Math.PI / 2;
+
+            body.add(cube);
+            body.add(topLeftCylinder);
+            body.add(topRightCylinder);
+
+            body.add(createPump(-8, 1.5, -3));
+            body.add(createPump(0, 3, -3));
+            body.add(createPump(8, 5.5, -3));
+
+            body.add(createPump(-8, 1, 3));
+            body.add(createPump(0, 3.5, 3));
+            body.add(createPump(8, 5, 3));
+
+            // move it to the top:
+            body.position.x = translationX;
+            body.position.y = translationY;
+
+            return body;
+        }
+
+        var engineCylinders = [];
+        function createPump(x,y,z) {
+            var material = new THREE.MeshPhongMaterial({color: 0x353535});
+            var cylinder = new THREE.CylinderGeometry(4, 4, 12, 32);
+            var pump = new THREE.Mesh(cylinder, material);
+
+            pump.position.x = x;
+            pump.position.y =y;
+            pump.position.z = z;
+
+            engineCylinders.push(pump);
+
+            return pump;
+        }
+
+        function createBody(dimensions) {
+
+            var onlyXs = dimensions.map(function (location) {
+                return location.x;
+            });
+
+            var onlyYs = dimensions.map(function (location) {
+                return location.z;
+            });
+
+            var smallestY = onlyYs.reduce(function (previous, current) {
+                if (previous > current) {
+                    return current;
+                } else {
+                    return previous;
+                }
+            });
+
+            var biggestY = onlyYs.reduce(function (previous, current) {
+                if (previous < current) {
+                    return current;
+                } else {
+                    return previous;
+                }
+            });
+
+            var smallestX = onlyXs.reduce(function (previous, current) {
+                if (previous > current) {
+                    return current;
+                } else {
+                    return previous;
+                }
+            });
+
+            var biggestX = onlyXs.reduce(function (previous, current) {
+                if (previous < current) {
+                    return current;
+                } else {
+                    return previous;
+                }
+            });
+
+            var lengthY = biggestY - smallestY;
+            var lengthX = biggestX - smallestX;
+
+            var cylinder = new THREE.CylinderGeometry(2, 2, lengthX, 32);
+            var cylinder2 = new THREE.CylinderGeometry(2, 2, lengthY, 32);
+            var material = new THREE.MeshPhongMaterial({color: 0x323232});
+            var box = new THREE.BoxGeometry(8, 8, 8);
+
+            var body = new THREE.Object3D();
+
+            var mainBeam = new THREE.Mesh(cylinder, material);
+            mainBeam.rotation.z = Math.PI / 2;
+            mainBeam.receiveShadow = true;
+            mainBeam.castShadow = true;
+            body.add(mainBeam);
+
+            var backBeam = new THREE.Mesh(cylinder2, material);
+            backBeam.rotation.z = Math.PI / 2;
+            backBeam.rotation.y = Math.PI / 2;
+            backBeam.position.x = smallestX;
+            backBeam.receiveShadow = true;
+            backBeam.castShadow = true;
+            body.add(backBeam);
+
+            var frontBeam = new THREE.Mesh(cylinder2, material);
+            frontBeam.rotation.z = Math.PI / 2;
+            frontBeam.rotation.y = Math.PI / 2;
+            frontBeam.position.x = biggestX;
+            frontBeam.receiveShadow = true;
+            frontBeam.castShadow = true;
+            body.add(frontBeam);
+
+
+            var cube = new THREE.Mesh(box, material);
+            var cube2 = new THREE.Mesh(box, material);
+            cube.position.x = smallestX;
+            cube2.position.x = biggestX;
+            body.add(cube);
+            body.add(cube2);
+
+            return body;
+        }
+
+        function createWheels(locations) {
+
+            var wheelSet = new THREE.Object3D();
+
+            wheels = [];
+
+            locations.forEach(function (location) {
+                var wheel = new THREE.Object3D();
+                wheel.add(createTire());
+                wheel.add(createSpokes(10));
+                wheel.position.x = location.x;
+                wheel.position.z = location.z;
+                wheelSet.add(wheel);
+                wheel.receiveShadow = true;
+                wheel.castShadow = true;
+
+
+                wheels.push(wheel);
+            });
+
+            return wheelSet;
+        }
+
+        function createTire() {
+
+            var torus = new THREE.TorusGeometry(10, 3, 16, 100);
+            var material = new THREE.MeshPhongMaterial({color: 0xff6200});
+
+            var tire = new THREE.Mesh(torus, material);
+
+            tire.receiveShadow = true;
+            tire.castShadow = true;
+
+            return tire;
+
+        }
+
+        function createSpokes(numOfSpokes) {
+
+            var cylinder = new THREE.CylinderGeometry(0.08, 0.08, 15, 32);
+            var material = new THREE.MeshPhongMaterial({color: 0xffffff});
+            var spokes = new THREE.Object3D();
+
+            if (numOfSpokes > 0) {
+                for (var i = 0; i < numOfSpokes; i++) {
+
+                    var spoke = new THREE.Mesh(cylinder, material);
+                    spoke.rotation.z = Math.PI * (i / numOfSpokes);
+                    spokes.add(spoke);
+
+                    spoke.receiveShadow = true;
+                    spoke.castShadow = true;
+                }
+            }
+
+            return spokes;
+
+        }
+
+        // animation loop
+        function render() {
+            requestAnimationFrame(render);
+            renderer.render(scene, camera);
+
+            // show models always rotate, right?
+            car.rotateY(-0.01);
+
+            // spin them wheels
+            renderSpinningWheels();
+            // rev the engine
+            renderEngineCylinder();
+        }
+
+        function renderSpinningWheels() {
+            wheels.forEach(function (wheel) {
+                wheel.rotation.z += 2;
+            });
+        }
+
+        function renderEngineCylinder() {
+            engineCylinders.forEach(function (cylinder) {
+                if (cylinder.position.y > 5) {
+                    cylinder.position.y -= 5 ;
+                }
+                cylinder.position.y += 0.5;
+            })
+        }
+    </script>
+</head>
+<body onload="init()">
+</body>
+</html>
